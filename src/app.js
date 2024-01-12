@@ -15,6 +15,15 @@ import User from "./db/models/user.js";
 import UserStatus from "./db/models/userStatus.js";
 import dotenv from 'dotenv';
 
+const checkAuthorization = (req, res, next) => {
+  if (req.headers.authorization !== process.env.API_KEY) {
+    res.sendStatus(401);
+    return;
+  }
+
+  next();
+};
+
 dotenv.config();
 
 const app = express();
@@ -23,6 +32,7 @@ const port = process.env.PORT || 3000;
 
 app.use(cors());
 app.use(express.json());
+app.use(checkAuthorization);
 
 app.get('/', (req, res) => {
   res.send('you can receive some info for personal cabinets');
