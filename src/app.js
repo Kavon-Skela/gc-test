@@ -13,10 +13,13 @@ import Rate from "./db/models/rate.js";
 import Segment from "./db/models/segment.js";
 import User from "./db/models/user.js";
 import UserStatus from "./db/models/userStatus.js";
+import dotenv from 'dotenv';
+
+dotenv.config();
 
 const app = express();
 
-const port = 3000;
+const port = process.env.PORT || 3000;
 
 app.use(cors());
 app.use(express.json());
