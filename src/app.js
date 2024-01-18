@@ -73,6 +73,26 @@ app.get('/promos', async (req, res) => {
   res.send(promos);
 });
 
+app.post('/promos', async (req, res) => {
+  const promo = req.body;
+
+  await Promo.create(promo);
+
+  res.send(promo);
+})
+
+app.delete('/promos', async (req, res) => {
+  const promoId = req.body.id;
+
+  await Promo.destroy({
+    where: {
+      id: promoId
+    }
+  });
+
+  res.sendStatus(204);
+});
+
 app.get('/rates', async (req, res) => {
   const rates = await Rate.findAll();
   res.send(rates);
