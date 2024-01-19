@@ -93,6 +93,30 @@ app.delete('/promos', async (req, res) => {
   res.sendStatus(204);
 });
 
+app.patch('/promos', async (req, res) => {
+  const editingInfo = req.body;
+
+  const currentPromo = await Promo.findByPk(editingInfo.id);
+
+  if (!currentPromo) {
+    res.sendStatus(404);
+
+    return;
+  }
+
+  const updatingObject = {};
+
+  for (const key in editingInfo) {
+    if (key !== 'id' && editingInfo[key] !== undefined) {
+      updatingObject[key] = editingInfo[key];
+    }
+  }
+
+  await currentPromo.update(updatingObject);
+
+  res.send(currentPromo);
+});
+
 app.get('/rates', async (req, res) => {
   const rates = await Rate.findAll();
   res.send(rates);
