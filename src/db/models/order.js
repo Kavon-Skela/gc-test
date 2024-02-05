@@ -26,7 +26,7 @@ Order.init({
     type: DataTypes.STRING,
   },
   clientGiveAmount: {
-    type: DataTypes.INTEGER,
+    type: DataTypes.FLOAT(2),
     allowNull: false,
   },
   clientGiveCurrency: {
@@ -34,7 +34,7 @@ Order.init({
     allowNull: false,
   },
   clientReceiveAmount: {
-    type: DataTypes.INTEGER,
+    type: DataTypes.FLOAT(2),
     allowNull: false,
   },
   clientReceiveCurrency: {
@@ -42,7 +42,7 @@ Order.init({
     allowNull: false,
   },
   currentRate: {
-    type: DataTypes.INTEGER,
+    type: DataTypes.FLOAT(3),
     allowNull: false,
   },
   branchId: {

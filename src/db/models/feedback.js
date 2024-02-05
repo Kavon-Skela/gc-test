@@ -35,6 +35,13 @@ Feedback.init({
   dislike: {
     type: DataTypes.STRING,
   },
+  status: {
+    type: DataTypes.ENUM('raw', 'processed'),
+    defaultValue: 'raw'
+  },
+  commentary: {
+    type: DataTypes.STRING
+  }
 }, {
   sequelize,
   tableName: 'Feedback',

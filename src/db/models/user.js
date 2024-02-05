@@ -35,10 +35,10 @@ User.init({
     type: DataTypes.STRING,
   },
   allowedPromos: {
-    type: DataTypes.ARRAY(DataTypes.UUID)
+    type: DataTypes.ARRAY(DataTypes.STRING)
   },
   usedPromos: {
-    type: DataTypes.ARRAY(DataTypes.UUID)
+    type: DataTypes.ARRAY(DataTypes.STRING)
   },
   totalOrders: {
     type: DataTypes.INTEGER
@@ -55,6 +55,9 @@ User.init({
   failOrdersSum: {
     type: DataTypes.INTEGER
   },
+  totalOrdersSum: {
+    type: DataTypes.INTEGER,
+  },
   averageSuccessOrderAmount: {
     type: DataTypes.INTEGER
   },
@@ -70,15 +73,12 @@ User.init({
   favouriteBranch: {
     type: DataTypes.STRING
   },
-  allOrders: {
-    type: DataTypes.ARRAY(DataTypes.UUID)
-  },
-  segment: {
-    type: DataTypes.STRING
-  },
   entries: {
     type: DataTypes.ARRAY(DataTypes.STRING),
   },
+  orders: {
+    type: DataTypes.ARRAY(DataTypes.JSON)
+  }
 }, {
   sequelize,
   tableName: 'Users',

@@ -8,12 +8,21 @@ const sequelize = new Sequelize(`${process.env.PG_DB}://${process.env.PG_USER}:$
 class Blacklist extends Model {}
 
 Blacklist.init({
+  id: {
+    type: DataTypes.UUID,
+    defaultValue: DataTypes.UUIDV4,
+    primaryKey: true,
+    allowNull: false,
+    unique: true
+  },
   phoneNumber: {
     type: DataTypes.STRING,
-    primaryKey: true,
     allowNull: false,
     unique: true,
   },
+  reason: {
+    type: DataTypes.STRING
+  }
 }, {
   sequelize,
   tableName: 'Blacklist',

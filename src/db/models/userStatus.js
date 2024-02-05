@@ -27,14 +27,6 @@ UserStatus.init({
     type: DataTypes.STRING,
     allowNull: false,
   },
-  time: {
-    type: DataTypes.STRING,
-    allowNull: false,
-  },
-  date: {
-    type: DataTypes.STRING,
-    allowNull: false,
-  },
   branchAddress: {
     type: DataTypes.STRING,
   },
@@ -53,6 +45,13 @@ UserStatus.init({
   currentRate: {
     type: DataTypes.INTEGER,
   },
+  recordStatus: {
+    type: DataTypes.ENUM('raw', 'processed'),
+    defaultValue: 'raw'
+  },
+  commentary: {
+    type: DataTypes.STRING
+  }
 }, {
   sequelize,
   tableName: 'UserStatuses',

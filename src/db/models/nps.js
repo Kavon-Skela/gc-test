@@ -19,10 +19,21 @@ NPS.init({
     type: DataTypes.UUID,
     allowNull: false,
   },
+  phoneNumber: {
+    type: DataTypes.STRING,
+    allowNull: false,
+  },
   numberOfStars: {
     type: DataTypes.INTEGER,
     allowNull: false,
   },
+  status: {
+    type: DataTypes.ENUM('raw', 'processed'),
+    defaultValue: 'raw'
+  },
+  commentary: {
+    type: DataTypes.STRING
+  }
 }, {
   sequelize,
   tableName: 'NPS',
