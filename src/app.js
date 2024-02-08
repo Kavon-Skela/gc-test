@@ -15,9 +15,12 @@ import User from "./db/models/user.js";
 import UserStatus from "./db/models/userStatus.js";
 import dotenv from 'dotenv';
 import { Op } from "sequelize";
+import events from 'events';
+
+const emitter = new events.EventEmitter();
 
 const checkAuthorization = (req, res, next) => {
-  if (req.headers.authorization !== process.env.API_KEY) {
+  if (req.headers.authorization !== process.env.API_KEY && !req.originalUrl.includes('nps-connect-sse')) {
     res.sendStatus(401);
     return;
   }
@@ -33,7 +36,17 @@ const port = process.env.PORT || 3000;
 
 app.use(cors());
 app.use(express.json());
+
+app.use((req, res, next) => {
+  res.setHeader('Access-Control-Allow-Origin', 'https://nov.lttrbx.link');
+  res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
+  res.setHeader('Access-Control-Allow-Headers', 'Authorization, Content-Type');
+  res.setHeader('Access-Control-Allow-Credentials', 'true');
+  next();
+});
+
 app.use(checkAuthorization);
+
 
 app.get('/', (req, res) => {
   res.send('you can receive some info for personal cabinets');
@@ -87,6 +100,18 @@ app.get('/nps', async (req, res) => {
   res.send(nps);
 });
 
+app.get('/nps-connect-sse', async (req, res) => {
+  res.writeHead(200, {
+    'Connection': 'keep-alive',
+    'Content-Type': 'text/event-stream',
+    'Cache-Control': 'no-cache',
+  });
+
+  emitter.on('npsDataChanged', (nps) => {
+    res.write(`data: ${JSON.stringify(nps)} \n\n`)
+  });
+});
+
 app.patch('/npsUpdateStatus', async (req, res) => {
   const { id, status } = req.body;
 
@@ -99,6 +124,8 @@ app.patch('/npsUpdateStatus', async (req, res) => {
   currentRecord.status = status;
 
   await currentRecord.save();
+
+  emitter.emit('npsDataChanged', currentRecord);
 
   res.sendStatus(204);
 });
@@ -115,6 +142,8 @@ app.patch('/npsUpdateCommentary', async (req, res) => {
   currentRecord.commentary = commentary;
 
   await currentRecord.save();
+
+  emitter.emit('npsDataChanged', currentRecord);
 
   res.sendStatus(204);
 });
