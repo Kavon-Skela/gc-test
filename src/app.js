@@ -95,6 +95,16 @@ app.get('/feedback', async (req, res) => {
   res.send(feedback);
 });
 
+app.post('/feedback', async (req, res) => {
+  const newfeedback = req.body;
+
+  const createdfeedback = await NPS.create(newfeedback);
+
+  emitter.emit('feedbackAdd', createdfeedback.dataValues);
+
+  res.sendStatus(201);
+});
+
 app.get('/nps', async (req, res) => {
   const nps = await NPS.findAll();
   res.send(nps);
