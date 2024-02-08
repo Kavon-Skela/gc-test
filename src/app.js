@@ -98,7 +98,7 @@ app.get('/feedback', async (req, res) => {
 app.post('/feedback', async (req, res) => {
   const newfeedback = req.body;
 
-  const createdfeedback = await NPS.create(newfeedback);
+  const createdfeedback = await Feedback.create(newfeedback);
 
   emitter.emit('feedbackAdd', createdfeedback.dataValues);
 
