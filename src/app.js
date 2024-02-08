@@ -20,7 +20,7 @@ import events from 'events';
 const emitter = new events.EventEmitter();
 
 const checkAuthorization = (req, res, next) => {
-  if (req.headers.authorization !== process.env.API_KEY && !req.originalUrl.includes('nps-connect-sse')) {
+  if (req.headers.authorization !== process.env.API_KEY && !req.originalUrl.includes('connect-sse')) {
     res.sendStatus(401);
     return;
   }
@@ -100,6 +100,16 @@ app.get('/nps', async (req, res) => {
   res.send(nps);
 });
 
+app.post('/nps', async (req, res) => {
+  const newNPS = req.body;
+
+  const createdNPS = await NPS.create(newNPS);
+
+  emitter.emit('npsAdd', createdNPS.dataValues);
+
+  res.sendStatus(201);
+});
+
 app.get('/nps-connect-sse', async (req, res) => {
   res.writeHead(200, {
     'Connection': 'keep-alive',
@@ -107,8 +117,46 @@ app.get('/nps-connect-sse', async (req, res) => {
     'Cache-Control': 'no-cache',
   });
 
-  emitter.on('npsDataChanged', (nps) => {
-    res.write(`data: ${JSON.stringify(nps)} \n\n`)
+  const npsUpdateCB = (nps) => {
+    res.write(`event: update\ndata: ${JSON.stringify(nps)} \n\n`);
+  };
+
+  const npsAddCB = (nps) => {
+    res.write(`event: add\ndata: ${JSON.stringify(nps)} \n\n`);
+  };
+
+  emitter.on('npsDataChanged', npsUpdateCB);
+
+  emitter.on('npsAdd', npsAddCB);
+
+  res.on('close', () => {
+    emitter.off('npsDataChanged', npsUpdateCB);
+    emitter.off('npsAdd', npsAddCB);
+  });
+});
+
+app.get('/feedback-connect-sse', async (req, res) => {
+  res.writeHead(200, {
+    'Connection': 'keep-alive',
+    'Content-Type': 'text/event-stream',
+    'Cache-Control': 'no-cache',
+  });
+
+  const feedbackUpdateCB = (feedback) => {
+    res.write(`event: update\ndata: ${JSON.stringify(feedback)} \n\n`);
+  };
+
+  const feedbackAddCB = (feedback) => {
+    res.write(`event: add\ndata: ${JSON.stringify(feedback)} \n\n`);
+  };
+
+  emitter.on('feedbackDataChanged', feedbackUpdateCB);
+
+  emitter.on('feedbackAdd', feedbackAddCB);
+
+  res.on('close', () => {
+    emitter.off('feedbackDataChanged', feedbackUpdateCB);
+    emitter.off('feedbackAdd', feedbackAddCB);
   });
 });
 
@@ -451,6 +499,8 @@ app.patch('/feedbackUpdateStatus', async (req, res) => {
 
   await currentRecord.save();
 
+  emitter.emit('feedbackDataChanged', currentRecord);
+
   res.sendStatus(204);
 });
 
@@ -466,6 +516,8 @@ app.patch('/feedbackUpdatecommentary', async (req, res) => {
   currentRecord.commentary = commentary;
 
   await currentRecord.save();
+
+  emitter.emit('feedbackDataChanged', currentRecord);
 
   res.sendStatus(204);
 });
