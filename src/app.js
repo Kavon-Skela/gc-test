@@ -170,6 +170,31 @@ app.get('/feedback-connect-sse', async (req, res) => {
   });
 });
 
+app.get('/userStatus-connect-sse', async (req, res) => {
+  res.writeHead(200, {
+    'Connection': 'keep-alive',
+    'Content-Type': 'text/event-stream',
+    'Cache-Control': 'no-cache',
+  });
+
+  const userStatusUpdateCB = (userStatus) => {
+    res.write(`event: update\ndata: ${JSON.stringify(userStatus)} \n\n`);
+  };
+
+  const userStatusAddCB = (userStatus) => {
+    res.write(`event: add\ndata: ${JSON.stringify(userStatus)} \n\n`);
+  };
+
+  emitter.on('userStatusDataChanged', userStatusUpdateCB);
+
+  emitter.on('userStatusAdd', userStatusAddCB);
+
+  res.on('close', () => {
+    emitter.off('userStatusDataChanged', userStatusUpdateCB);
+    emitter.off('userStatusAdd', userStatusAddCB);
+  });
+});
+
 app.patch('/npsUpdateStatus', async (req, res) => {
   const { id, status } = req.body;
 
@@ -496,6 +521,16 @@ app.get('/userStatuses', async (req, res) => {
   res.send(userStatuses);
 });
 
+app.post('/userStatuses', async (req, res) => {
+  const userStatus = req.body;
+
+  const createduserStatus = await UserStatus.create(userStatus);
+
+  emitter.emit('userStatusAdd', createduserStatus.dataValues);
+
+  res.sendStatus(201);
+});
+
 app.patch('/feedbackUpdateStatus', async (req, res) => {
   const { id, status } = req.body;
 
@@ -545,6 +580,8 @@ app.patch('/userStatusUpdateStatus', async (req, res) => {
 
   await currentRecord.save();
 
+  emitter.emit('userStatusDataChanged', currentRecord);
+
   res.sendStatus(204);
 });
 
@@ -560,6 +597,8 @@ app.patch('/userStatusesUpdateCommentary', async (req, res) => {
   currentRecord.commentary = commentary;
 
   await currentRecord.save();
+
+  emitter.emit('userStatusDataChanged', currentRecord);
 
   res.sendStatus(204);
 });
