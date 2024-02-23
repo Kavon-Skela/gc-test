@@ -38,7 +38,7 @@ app.use(cors());
 app.use(express.json());
 
 app.use((req, res, next) => {
-  res.setHeader('Access-Control-Allow-Origin', 'https://dashboard.lttrbx.link');
+  res.setHeader('Access-Control-Allow-Origin', 'http://localhost:5173');
   res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
   res.setHeader('Access-Control-Allow-Headers', 'Authorization, Content-Type');
   res.setHeader('Access-Control-Allow-Credentials', 'true');
@@ -398,7 +398,7 @@ app.post('/promosBroadcast', async(req, res) => {
     const dateToComparingFrom = consolidatedTimeFrom.toISOString();
     const dateToComparingTo = consolidatedTimeTo.toISOString();
 
-    const branchCondition = branch ? { [Op.eq]: branch } : { [Op.not]: null }
+    const branchCondition = branch.length ? { [Op.in]: branch } : { [Op.not]: null }
 
     const orders = await Order.findAll({
       where: {
