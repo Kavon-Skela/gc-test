@@ -84,6 +84,24 @@ app.post('/blacklist', async (req, res) => {
   res.sendStatus(201);
 });
 
+app.delete('/blacklist', async (req, res) => {
+  const recordId = req.body.id;
+
+  const currentRecord = await Blacklist.findByPk(recordId);
+
+  if (!currentRecord) {
+    res.sendStatus(404);
+  }
+
+  await Blacklist.destroy({
+    where: {
+      id: recordId
+    }
+  });
+
+  res.sendStatus(204);
+});
+
 app.get('/branches', async (req, res) => {
   const branches = await Branch.findAll();
   res.send(branches);

@@ -5,9 +5,9 @@ dotenv.config();
 
 const sequelize = new Sequelize(`${process.env.PG_DB}://${process.env.PG_USER}:${process.env.PG_PASSWORD}@${process.env.PG_HOST}/${process.env.PG_DB_NAME}?sslmode=require`);
 
-class Weekdays extends Model {}
+class Currencies extends Model {}
 
-Weekdays.init({
+Currencies.init({
   uuid: {
     type: DataTypes.UUID,
     defaultValue: DataTypes.UUIDV4,
@@ -21,20 +21,20 @@ Weekdays.init({
     unique: true,
     autoIncrement: true,
   },
-  day: {
+  currency: {
     type: DataTypes.STRING,
     allowNull: false,
     unique: true,
   },
-  jsKey: {
+  symbol: {
     type: DataTypes.STRING,
     allowNull: false,
     unique: true,
   }
 }, {
   sequelize,
-  tableName: 'Weekdays',
+  tableName: 'Currencies',
   timestamps: true,
 });
 
-export default Weekdays
+export default Currencies
