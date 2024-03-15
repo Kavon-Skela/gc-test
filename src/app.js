@@ -202,13 +202,27 @@ app.get('/userStatus-connect-sse', async (req, res) => {
     res.write(`event: add\ndata: ${JSON.stringify(userStatus)} \n\n`);
   };
 
+  const userStatusUpdateSecondNameCB = (userStatus) => {
+    res.write(`event: updateSecondName\ndata: ${JSON.stringify(userStatus)} \n\n`);
+  };
+
+  const userStatusUpdateInformationCB = (userStatus) => {
+    res.write(`event: updateInformation\ndata: ${JSON.stringify(userStatus)} \n\n`);
+  };
+
   emitter.on('userStatusDataChanged', userStatusUpdateCB);
 
   emitter.on('userStatusAdd', userStatusAddCB);
 
+  emitter.on('userStatusUpdateSecondName', userStatusUpdateSecondNameCB);
+  
+  emitter.on('userStatusUpdateInformation', userStatusUpdateInformationCB);
+
   res.on('close', () => {
     emitter.off('userStatusDataChanged', userStatusUpdateCB);
     emitter.off('userStatusAdd', userStatusAddCB);
+    emitter.off('userStatusUpdateSecondName', userStatusUpdateSecondNameCB);
+    emitter.off('userStatusUpdateInformation', userStatusUpdateInformationCB);
   });
 });
 
@@ -346,34 +360,42 @@ app.post('/promosBroadcast', async(req, res) => {
   } = req.body;
 
   const allCurrencies = ["USD", "UAH", "EUR", "GBP", "CHF", "PLN"];
+
+  const whereClause = {
+    totalOrders: {
+      [Op.between]: [totalOrdersFrom, totalOrdersTo]
+    },
+    successOrders: {
+      [Op.between]: [successOrdersFrom, successOrdersTo]
+    },
+    failOrders: {
+      [Op.between]: [failOrdersFrom, failOrdersTo]
+    },
+    totalOrdersSum: {
+      [Op.between]: [totalOrdersSumFrom, totalOrdersSumTo]
+    },
+    successOrdersSum: {
+      [Op.between]: [successOrdersSumFrom, successOrdersSumTo]
+    },
+    failOrdersSum: {
+      [Op.between]: [failOrdersSumFrom, failOrdersSumTo]
+    }
+  };
+
+  if (favouriteCurrenciesBuy.length) {
+    whereClause.favouriteCurrencyGive = {
+      [Op.in]: favouriteCurrenciesBuy.length ? favouriteCurrenciesBuy : allCurrencies
+    }
+  }
+
+  if (favouriteCurrenciesSell.length) {
+    whereClause.favouriteCurrencyReceive = {
+      [Op.in]: favouriteCurrenciesSell.length ? favouriteCurrenciesSell : allCurrencies
+    }
+  }
   
   let foundUsers = await User.findAll({
-    where: {
-      totalOrders: {
-        [Op.between]: [totalOrdersFrom, totalOrdersTo]
-      },
-      successOrders: {
-        [Op.between]: [successOrdersFrom, successOrdersTo]
-      },
-      failOrders: {
-        [Op.between]: [failOrdersFrom, failOrdersTo]
-      },
-      totalOrdersSum: {
-        [Op.between]: [totalOrdersSumFrom, totalOrdersSumTo]
-      },
-      successOrdersSum: {
-        [Op.between]: [successOrdersSumFrom, successOrdersSumTo]
-      },
-      failOrdersSum: {
-        [Op.between]: [failOrdersSumFrom, failOrdersSumTo]
-      },
-      favouriteCurrencyGive: {
-        [Op.in]: favouriteCurrenciesBuy.length ? favouriteCurrenciesBuy : allCurrencies
-      },
-      favouriteCurrencyReceive: {
-        [Op.in]: favouriteCurrenciesSell.length ? favouriteCurrenciesSell : allCurrencies
-      },
-    }
+    where: whereClause
   });
 
   if (exactOrderFlag) {
@@ -456,22 +478,71 @@ app.post('/promosBroadcast', async(req, res) => {
       sex,
       email,
       phoneNumber,
+      includeUsersWithoutFirstName,
+      includeUsersWithoutLastName,
+      includeUsersWithoutBirthDate,
+      includeUsersWithoutSex,
+      includeUsersWithoutEmail,
     } = exactUser;
 
     if (firstName) {
       foundUsers = foundUsers.filter(user => user.firstName === firstName);
     }
 
+    if (includeUsersWithoutFirstName.length && includeUsersWithoutFirstName.length !== 2) {
+      if (includeUsersWithoutFirstName.includes('defined')) {
+        foundUsers = foundUsers.filter(user => user.firstName);
+      }
+
+      if (includeUsersWithoutFirstName.includes('undefined')) {
+        foundUsers = foundUsers.filter(user => !user.firstName);
+      }
+    }
+
     if (lastName) {
       foundUsers = foundUsers.filter(user => user.lastName === lastName);
     }
 
-    if (sex.length) {
+    if (includeUsersWithoutLastName.length && includeUsersWithoutLastName.length !== 2) {
+      if (includeUsersWithoutLastName.includes('defined')) {
+        foundUsers = foundUsers.filter(user => user.lastName);
+      }
+
+      if (includeUsersWithoutLastName.includes('undefined')) {
+        foundUsers = foundUsers.filter(user => !user.lastName);
+      }
+    }
+
+    console.log(foundUsers);
+
+    if (sex.length && sex.length !== 3) {
       foundUsers = foundUsers.filter(user => sex.includes(user.sex));
+    }
+
+    console.log(foundUsers);
+     
+    if (includeUsersWithoutSex.length && includeUsersWithoutSex.length !== 2) {
+      if (includeUsersWithoutSex.includes('defined')) {
+        foundUsers = foundUsers.filter(user => user.sex);
+      }
+
+      if (includeUsersWithoutSex.includes('undefined')) {
+        foundUsers = foundUsers.filter(user => !user.sex);
+      }
     }
 
     if (email) {
       foundUsers = foundUsers.filter(user => user.email === email);
+    }
+ 
+    if (includeUsersWithoutEmail.length && includeUsersWithoutEmail.length !== 2) {
+      if (includeUsersWithoutEmail.includes('defined')) {
+        foundUsers = foundUsers.filter(user => user.email);
+      }
+
+      if (includeUsersWithoutEmail.includes('undefined')) {
+        foundUsers = foundUsers.filter(user => !user.email);
+      }
     }
 
     if (phoneNumber) {
@@ -484,6 +555,16 @@ app.post('/promosBroadcast', async(req, res) => {
 
     if (birthDateTo) {
       foundUsers = foundUsers.filter(user => user.birthDate <= birthDateTo);
+    }
+    
+    if (includeUsersWithoutBirthDate.length && includeUsersWithoutBirthDate.length !== 2) {
+      if (includeUsersWithoutBirthDate.includes('defined')) {
+        foundUsers = foundUsers.filter(user => user.birthDate);
+      }
+
+      if (includeUsersWithoutBirthDate.includes('undefined')) {
+        foundUsers = foundUsers.filter(user => !user.birthDate);
+      }
     }
   }
 
@@ -584,6 +665,42 @@ app.patch('/feedbackUpdatecommentary', async (req, res) => {
   res.sendStatus(204);
 });
 
+app.patch('/userStatusUpdateSecondName', async (req, res) => {
+  const { id, secondName } = req.body;
+
+  const currentRecord = await UserStatus.findByPk(id);
+
+  if (!currentRecord) {
+    res.sendStatus(404)
+  }
+
+  currentRecord.operatorSecondName = secondName;
+
+  await currentRecord.save();
+
+  emitter.emit('userStatusUpdateSecondName', currentRecord);
+
+  res.sendStatus(204);
+});
+
+app.patch('/userStatusUpdateInformation', async (req, res) => {
+  const { id, information } = req.body;
+
+  const currentRecord = await UserStatus.findByPk(id);
+
+  if (!currentRecord) {
+    res.sendStatus(404)
+  }
+
+  currentRecord.information = information;
+
+  await currentRecord.save();
+
+  emitter.emit('userStatusUpdateInformation', currentRecord);
+
+  res.sendStatus(204);
+});
+
 app.patch('/userStatusUpdateStatus', async (req, res) => {
   const { id, recordStatus } = req.body;
 
@@ -622,4 +739,4 @@ app.patch('/userStatusesUpdateCommentary', async (req, res) => {
 
 app.listen(port, () => {
   console.log(`app is listening on port - ${port}`)
-})
+});

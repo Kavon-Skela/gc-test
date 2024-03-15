@@ -35,34 +35,43 @@ User.init({
     type: DataTypes.STRING,
   },
   allowedPromos: {
-    type: DataTypes.ARRAY(DataTypes.STRING)
+    type: DataTypes.ARRAY(DataTypes.STRING),
+    defaultValue: []
   },
   usedPromos: {
     type: DataTypes.ARRAY(DataTypes.STRING)
   },
   totalOrders: {
-    type: DataTypes.INTEGER
+    type: DataTypes.INTEGER,
+    defaultValue: 0
   },
   successOrders: {
-    type: DataTypes.INTEGER
+    type: DataTypes.INTEGER,
+    defaultValue: 0
   },
   failOrders: {
-    type: DataTypes.INTEGER
+    type: DataTypes.INTEGER,
+    defaultValue: 0
   },
   successOrdersSum: {
-    type: DataTypes.INTEGER
+    type: DataTypes.INTEGER,
+    defaultValue: 0
   },
   failOrdersSum: {
-    type: DataTypes.INTEGER
+    type: DataTypes.INTEGER,
+    defaultValue: 0
   },
   totalOrdersSum: {
     type: DataTypes.INTEGER,
+    defaultValue: 0
   },
   averageSuccessOrderAmount: {
-    type: DataTypes.INTEGER
+    type: DataTypes.INTEGER,
+    defaultValue: 0
   },
   averageFailOrderAmount: {
-    type: DataTypes.INTEGER
+    type: DataTypes.INTEGER,
+    defaultValue: 0
   },
   favouriteCurrencyGive: {
     type: DataTypes.STRING

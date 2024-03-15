@@ -51,7 +51,13 @@ UserStatus.init({
   },
   commentary: {
     type: DataTypes.STRING
-  }
+  },
+  information: {
+    type: DataTypes.STRING
+  },
+  operatorSecondName: {
+    type: DataTypes.STRING
+  },
 }, {
   sequelize,
   tableName: 'UserStatuses',
