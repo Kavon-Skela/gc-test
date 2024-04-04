@@ -37,8 +37,8 @@ const port = process.env.PORT || 3000;
 app.use(cors());
 app.use(express.json());
 
-app.use((req, res, next) => {
-  res.setHeader('Access-Control-Allow-Origin', 'https://dashboard.lttrbx.link');
+app.use((_req, res, next) => {
+  res.setHeader('Access-Control-Allow-Origin', 'https://dshb');
   res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
   res.setHeader('Access-Control-Allow-Headers', 'Authorization, Content-Type');
   res.setHeader('Access-Control-Allow-Credentials', 'true');
@@ -47,16 +47,16 @@ app.use((req, res, next) => {
 
 app.use(checkAuthorization);
 
-app.get('/', (req, res) => {
+app.get('/', (_req, res) => {
   res.send('you can receive some info for personal cabinets');
 });
 
-app.get('/balances', async (req, res) => {
+app.get('/balances', async (_req, res) => {
   const balances = await Balance.findAll();
   res.send(balances);
 });
 
-app.get('/blacklist', async (req, res) => {
+app.get('/blacklist', async (_req, res) => {
   const blacklist = await Blacklist.findAll();
   res.send(blacklist);
 });
@@ -102,12 +102,12 @@ app.delete('/blacklist', async (req, res) => {
   res.sendStatus(204);
 });
 
-app.get('/branches', async (req, res) => {
+app.get('/branches', async (_req, res) => {
   const branches = await Branch.findAll();
   res.send(branches);
 });
 
-app.get('/feedback', async (req, res) => {
+app.get('/feedback', async (_req, res) => {
   const feedback = await Feedback.findAll();
   res.send(feedback);
 });
@@ -122,7 +122,7 @@ app.post('/feedback', async (req, res) => {
   res.sendStatus(201);
 });
 
-app.get('/nps', async (req, res) => {
+app.get('/nps', async (_req, res) => {
   const nps = await NPS.findAll();
   res.send(nps);
 });
@@ -137,7 +137,7 @@ app.post('/nps', async (req, res) => {
   res.sendStatus(201);
 });
 
-app.get('/nps-connect-sse', async (req, res) => {
+app.get('/nps-connect-sse', async (_req, res) => {
   res.writeHead(200, {
     'Connection': 'keep-alive',
     'Content-Type': 'text/event-stream',
@@ -162,7 +162,7 @@ app.get('/nps-connect-sse', async (req, res) => {
   });
 });
 
-app.get('/feedback-connect-sse', async (req, res) => {
+app.get('/feedback-connect-sse', async (_req, res) => {
   res.writeHead(200, {
     'Connection': 'keep-alive',
     'Content-Type': 'text/event-stream',
@@ -187,7 +187,7 @@ app.get('/feedback-connect-sse', async (req, res) => {
   });
 });
 
-app.get('/userStatus-connect-sse', async (req, res) => {
+app.get('/userStatus-connect-sse', async (_req, res) => {
   res.writeHead(200, {
     'Connection': 'keep-alive',
     'Content-Type': 'text/event-stream',
@@ -262,12 +262,12 @@ app.patch('/npsUpdateCommentary', async (req, res) => {
   res.sendStatus(204);
 });
 
-app.get('/orders', async (req, res) => {
+app.get('/orders', async (_req, res) => {
   const orders = await Order.findAll();
   res.send(orders);
 });
 
-app.get('/promos', async (req, res) => {
+app.get('/promos', async (_req, res) => {
   const promos = await Promo.findAll();
   res.send(promos);
 });
@@ -338,86 +338,93 @@ app.patch('/promos', async (req, res) => {
 
 app.post('/promosBroadcast', async(req, res) => {
   const {
-    totalOrdersFrom,
-    totalOrdersTo,
-    successOrdersFrom,
-    successOrdersTo,
-    failOrdersFrom,
-    failOrdersTo,
-    totalOrdersSumFrom,
-    totalOrdersSumTo,
-    successOrdersSumFrom,
-    successOrdersSumTo,
-    failOrdersSumFrom,
-    failOrdersSumTo,
-    favouriteCurrenciesBuy,
-    favouriteCurrenciesSell,
-    exactOrderFlag,
-    exactOrder,
-    exactUserFlag,
-    exactUser,
-    promoCodes
+    total_orders_from,
+    total_orders_to,
+    success_orders_from,
+    success_orders_to,
+    fail_orders_from,
+    fail_orders_to,
+    total_orders_sum_from,
+    total_orders_sum_to,
+    success_orders_sum_from,
+    success_orders_sum_to,
+    fail_orders_sum_from,
+    fail_orders_sum_to,
+    favourite_currencies_buy,
+    favourite_currencies_sell,
+    exact_order_flag,
+    exact_order_client_gave_from,
+    exact_order_client_gave_to,
+    exact_order_client_received_from,
+    exact_order_client_received_to,
+    exact_order_currency_buy,
+    exact_order_currency_sell,
+    exact_order_blue_dollars,
+    exact_order_branch,
+    exact_order_time_from,
+    exact_order_time_to,
+    exact_order_date_from,
+    exact_order_date_to,
+    exact_user_flag,
+    exact_user_first_name,
+    exact_user_include_users_without_first_name,
+    exact_user_last_name,
+    exact_user_include_users_without_last_name,
+    exact_user_birth_date_from,
+    exact_user_birth_date_to,
+    exact_user_include_users_without_birth_date,
+    exact_user_sex,
+    exact_user_include_users_without_sex,
+    exact_user_email,
+    exact_user_include_users_without_email,
+    exact_user_phone_number,
+    promo_codes,
   } = req.body;
 
   const allCurrencies = ["USD", "UAH", "EUR", "GBP", "CHF", "PLN"];
 
   const whereClause = {
     totalOrders: {
-      [Op.between]: [totalOrdersFrom, totalOrdersTo]
+      [Op.between]: [total_orders_from, total_orders_to]
     },
     successOrders: {
-      [Op.between]: [successOrdersFrom, successOrdersTo]
+      [Op.between]: [success_orders_from, success_orders_to]
     },
     failOrders: {
-      [Op.between]: [failOrdersFrom, failOrdersTo]
+      [Op.between]: [fail_orders_from, fail_orders_to]
     },
     totalOrdersSum: {
-      [Op.between]: [totalOrdersSumFrom, totalOrdersSumTo]
+      [Op.between]: [total_orders_sum_from, total_orders_sum_to]
     },
     successOrdersSum: {
-      [Op.between]: [successOrdersSumFrom, successOrdersSumTo]
+      [Op.between]: [success_orders_sum_from, success_orders_sum_to]
     },
     failOrdersSum: {
-      [Op.between]: [failOrdersSumFrom, failOrdersSumTo]
+      [Op.between]: [fail_orders_sum_from, fail_orders_sum_to]
     }
   };
 
-  if (favouriteCurrenciesBuy.length) {
+  if (favourite_currencies_buy.length) {
     whereClause.favouriteCurrencyGive = {
-      [Op.in]: favouriteCurrenciesBuy.length ? favouriteCurrenciesBuy : allCurrencies
+      [Op.in]: favourite_currencies_buy.length ? favourite_currencies_buy : allCurrencies
     }
   }
 
-  if (favouriteCurrenciesSell.length) {
+  if (favourite_currencies_sell.length) {
     whereClause.favouriteCurrencyReceive = {
-      [Op.in]: favouriteCurrenciesSell.length ? favouriteCurrenciesSell : allCurrencies
+      [Op.in]: favourite_currencies_sell.length ? favourite_currencies_sell : allCurrencies
     }
   }
-  
+
   let foundUsers = await User.findAll({
     where: whereClause
   });
 
-  if (exactOrderFlag) {
-    const {
-      timeFrom,
-      timeTo,
-      dateFrom,
-      dateTo,
-      branch,
-      clientGaveFrom,
-      clientGaveTo,
-      currencyBuy,
-      clientReceivedFrom,
-      clientReceivedTo,
-      currencySell,
-      blueDollars
-    } = exactOrder;
-
-    const splittedDateFrom = dateFrom ? dateFrom.split('-') : ['0000', '00', '00'];
-    const splittedDateTo = dateTo ? dateTo.split('-') : ['9999', '00', '00'];
-    const splittedTimeFrom = timeFrom ? timeFrom.split(':') : ['00', '00'];
-    const splittedTimeTo = timeTo ? timeTo.split(':') : [23, 59];
+  if (exact_order_flag) {
+    const splittedDateFrom = exact_order_date_from ? exact_order_date_from.split('-') : ['0000', '00', '00'];
+    const splittedDateTo = exact_order_date_to ? exact_order_date_to.split('-') : ['9999', '00', '00'];
+    const splittedTimeFrom = exact_order_time_from ? exact_order_time_from.split(':') : ['00', '00'];
+    const splittedTimeTo = exact_order_time_to ? exact_order_time_to.split(':') : [23, 59];
 
     const consolidatedTimeFrom = new Date(
       +splittedDateFrom[0],
@@ -438,138 +445,119 @@ app.post('/promosBroadcast', async(req, res) => {
     const dateToComparingFrom = consolidatedTimeFrom.toISOString();
     const dateToComparingTo = consolidatedTimeTo.toISOString();
 
-    const branchCondition = branch.length ? { [Op.in]: branch } : { [Op.not]: null }
+    const branchCondition = exact_order_branch.length ? { [Op.in]: exact_order_branch } : { [Op.not]: null }
 
     const orders = await Order.findAll({
       where: {
         clientGiveAmount: {
-          [Op.between]: [clientGaveFrom, clientGaveTo]
+          [Op.between]: [exact_order_client_gave_from, exact_order_client_gave_to]
         },
         clientGiveCurrency: {
-          [Op.in]: currencyBuy.length ? currencyBuy : allCurrencies
+          [Op.in]: exact_order_currency_buy.length ? exact_order_currency_buy : allCurrencies
         },
         clientReceiveAmount: {
-          [Op.between]: [clientReceivedFrom, clientReceivedTo]
+          [Op.between]: [exact_order_client_received_from, exact_order_client_received_to]
         },
         clientReceiveCurrency: {
-          [Op.in]: currencySell.length ? currencySell : allCurrencies
+          [Op.in]: exact_order_currency_sell.length ? exact_order_currency_sell : allCurrencies
         },
         branchId: branchCondition,
         blueDollars: {
-          [Op.eq]: blueDollars
+          [Op.eq]: exact_order_blue_dollars
         },
         createdAt: {
           [Op.between]: [dateToComparingFrom, dateToComparingTo],
         },
       }
     });
-  
+
     foundUsers = foundUsers.filter(user => {
       return orders.some(order => user.id === order.userId)
     });
   }
 
-  if (exactUserFlag) {
-    const {
-      firstName,
-      lastName,
-      birthDateFrom,
-      birthDateTo,
-      sex,
-      email,
-      phoneNumber,
-      includeUsersWithoutFirstName,
-      includeUsersWithoutLastName,
-      includeUsersWithoutBirthDate,
-      includeUsersWithoutSex,
-      includeUsersWithoutEmail,
-    } = exactUser;
-
-    if (firstName) {
-      foundUsers = foundUsers.filter(user => user.firstName === firstName);
+  if (exact_user_flag) {
+    if (exact_user_first_name) {
+      foundUsers = foundUsers.filter(user => user.firstName === exact_user_first_name);
     }
 
-    if (includeUsersWithoutFirstName.length && includeUsersWithoutFirstName.length !== 2) {
-      if (includeUsersWithoutFirstName.includes('defined')) {
+    if (exact_user_include_users_without_first_name.length && exact_user_include_users_without_first_name.length !== 2) {
+      if (exact_user_include_users_without_first_name.includes('defined')) {
         foundUsers = foundUsers.filter(user => user.firstName);
       }
 
-      if (includeUsersWithoutFirstName.includes('undefined')) {
+      if (exact_user_include_users_without_first_name.includes('undefined')) {
         foundUsers = foundUsers.filter(user => !user.firstName);
       }
     }
 
-    if (lastName) {
-      foundUsers = foundUsers.filter(user => user.lastName === lastName);
+    if (exact_user_last_name) {
+      foundUsers = foundUsers.filter(user => user.lastName === exact_user_last_name);
     }
 
-    if (includeUsersWithoutLastName.length && includeUsersWithoutLastName.length !== 2) {
-      if (includeUsersWithoutLastName.includes('defined')) {
+    if (exact_user_include_users_without_last_name.length && exact_user_include_users_without_last_name.length !== 2) {
+      if (exact_user_include_users_without_last_name.includes('defined')) {
         foundUsers = foundUsers.filter(user => user.lastName);
       }
 
-      if (includeUsersWithoutLastName.includes('undefined')) {
+      if (exact_user_include_users_without_last_name.includes('undefined')) {
         foundUsers = foundUsers.filter(user => !user.lastName);
       }
     }
 
-    console.log(foundUsers);
-
-    if (sex.length && sex.length !== 3) {
-      foundUsers = foundUsers.filter(user => sex.includes(user.sex));
+    if (exact_user_sex.length && exact_user_sex.length !== 3) {
+      foundUsers = foundUsers.filter(user => exact_user_sex.includes(user.sex));
     }
-
-    console.log(foundUsers);
      
-    if (includeUsersWithoutSex.length && includeUsersWithoutSex.length !== 2) {
-      if (includeUsersWithoutSex.includes('defined')) {
+    if (exact_user_include_users_without_sex.length && exact_user_include_users_without_sex.length !== 2) {
+      if (exact_user_include_users_without_sex.includes('defined')) {
         foundUsers = foundUsers.filter(user => user.sex);
       }
 
-      if (includeUsersWithoutSex.includes('undefined')) {
+      if (exact_user_include_users_without_sex.includes('undefined')) {
         foundUsers = foundUsers.filter(user => !user.sex);
       }
     }
 
-    if (email) {
-      foundUsers = foundUsers.filter(user => user.email === email);
+    if (exact_user_email) {
+      foundUsers = foundUsers.filter(user => user.email === exact_user_email);
     }
  
-    if (includeUsersWithoutEmail.length && includeUsersWithoutEmail.length !== 2) {
-      if (includeUsersWithoutEmail.includes('defined')) {
+    if (exact_user_include_users_without_email.length && exact_user_include_users_without_email.length !== 2) {
+      if (exact_user_include_users_without_email.includes('defined')) {
         foundUsers = foundUsers.filter(user => user.email);
       }
 
-      if (includeUsersWithoutEmail.includes('undefined')) {
+      if (exact_user_include_users_without_email.includes('undefined')) {
         foundUsers = foundUsers.filter(user => !user.email);
       }
     }
 
-    if (phoneNumber) {
-      foundUsers = foundUsers.filter(user => user.phoneNumber === phoneNumber);
+    if (exact_user_phone_number) {
+      foundUsers = foundUsers.filter(user => user.phoneNumber === exact_user_phone_number);
     }
 
-    if (birthDateFrom) {
-      foundUsers = foundUsers.filter(user => user.birthDate >= birthDateFrom);
+    if (exact_user_birth_date_from) {
+      foundUsers = foundUsers.filter(user => user.birthDate >= exact_user_birth_date_from);
     }
 
-    if (birthDateTo) {
-      foundUsers = foundUsers.filter(user => user.birthDate <= birthDateTo);
+    if (exact_user_birth_date_to) {
+      foundUsers = foundUsers.filter(user => user.birthDate <= exact_user_birth_date_to);
     }
     
-    if (includeUsersWithoutBirthDate.length && includeUsersWithoutBirthDate.length !== 2) {
-      if (includeUsersWithoutBirthDate.includes('defined')) {
+    if (exact_user_include_users_without_birth_date.length && exact_user_include_users_without_birth_date.length !== 2) {
+      if (exact_user_include_users_without_birth_date.includes('defined')) {
         foundUsers = foundUsers.filter(user => user.birthDate);
       }
 
-      if (includeUsersWithoutBirthDate.includes('undefined')) {
+      if (exact_user_include_users_without_birth_date.includes('undefined')) {
         foundUsers = foundUsers.filter(user => !user.birthDate);
       }
     }
   }
 
   for (const user of foundUsers) {
-    user.allowedPromos = [...user.allowedPromos, ...promoCodes];
+    user.allowedPromos = [...user.allowedPromos, ...promo_codes];
 
     await user.save();
   }
@@ -577,27 +565,27 @@ app.post('/promosBroadcast', async(req, res) => {
   res.send(foundUsers);
 });
 
-app.get('/rates', async (req, res) => {
+app.get('/rates', async (_req, res) => {
   const rates = await Rate.findAll();
   res.send(rates);
 });
 
-app.get('/roles', async (req, res) => {
+app.get('/roles', async (_req, res) => {
   const roles = await Role.findAll();
   res.send(roles);
 });
 
-app.get('/segments', async (req, res) => {
+app.get('/segments', async (_req, res) => {
   const segments = await Segment.findAll();
   res.send(segments);
 });
 
-app.get('/staff', async (req, res) => {
+app.get('/staff', async (_req, res) => {
   const staff = await Staff.findAll();
   res.send(staff);
 });
 
-app.get('/users', async (req, res) => {
+app.get('/users', async (_req, res) => {
   User.hasMany(Order, { foreignKey: 'userId' });
   User.hasMany(Feedback, { foreignKey: 'userId' });
   User.hasMany(NPS, { foreignKey: 'userId' });
@@ -614,7 +602,7 @@ app.get('/users', async (req, res) => {
   res.send(users);
 });
 
-app.get('/userStatuses', async (req, res) => {
+app.get('/userStatuses', async (_req, res) => {
   const userStatuses = await UserStatus.findAll();
   res.send(userStatuses);
 });
