@@ -38,7 +38,7 @@ app.use(cors());
 app.use(express.json());
 
 app.use((_req, res, next) => {
-  res.setHeader('Access-Control-Allow-Origin', 'https://dshb');
+  res.setHeader('Access-Control-Allow-Origin', 'https://dshb.garant.money');
   res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
   res.setHeader('Access-Control-Allow-Headers', 'Authorization, Content-Type');
   res.setHeader('Access-Control-Allow-Credentials', 'true');
